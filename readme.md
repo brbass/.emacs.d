@@ -21,6 +21,12 @@ make -j 16
 make install
 ```
 
+### Add to path
+
+```bash
+export PATH="/path/to/emacs-30.2/install/bin:$PATH"
+```
+
 ### Install LSP servers
 
 ```bash
@@ -28,12 +34,6 @@ sudo apt install clangd
 sudo apt install fortran-language-server
 npm install -g pyright
 npm install -g bash-language-server
-```
-
-### Add to path
-
-```bash
-export PATH="/path/to/emacs-30.2/install/bin:$PATH"
 ```
 
 ### Clone this package
