@@ -21,7 +21,7 @@
       (when (yes-or-no-p "Buffer has unsaved changes. Revert anyway? ")
         (revert-buffer :ignore-auto :noconfirm))
     (revert-buffer :ignore-auto :noconfirm)))
-(global-set-key (kbd "C-c r") 'my/revert-buffer)
+(global-set-key (kbd "C-c C-r") 'my/revert-buffer)
 
 ;;-----------------;;
 ;; Set up packages ;;
