@@ -13,6 +13,15 @@
 ;; Clean file complete
 (setq minibuffer-auto-raise t)
 
+;; Swap the actions of RET and C-j
+(global-set-key (kbd "C-j") #'newline-and-indent)
+(global-set-key (kbd "RET") #'newline)
+
+;; Make it so C++ doesn't indent in namespace
+(defun my-c++-namespace-indent-fix ()
+  "Don't indent code inside C++ namespace blocks."
+  (c-set-offset 'innamespace 0))
+
 ;; Reload file quickly
 (defun my/revert-buffer ()
   "Revert buffer from disk. Ask for confirmation only if buffer has unsaved changes."
@@ -42,6 +51,7 @@
                orderless
                vertico
                flycheck
+               transient
                lsp-mode
                lsp-pyright
                lsp-treemacs

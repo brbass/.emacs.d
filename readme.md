@@ -55,6 +55,4 @@ git clone https://github.com/brbass/emacs_config.git ~/.emacs.d
 
 ## Features to add:
 
-- Copilot plugin: https://github.com/copilot-emacs/copilot.el
-- Copilot chat: https://github.com/chep/copilot-chat.el
 - File preview when using find-file
