@@ -50,7 +50,7 @@ mv .emacs.d .emacs.d.backup
 ### Clone this package
 
 ```bash
-git clone https://github.com/brbass/emacs_config.git ~/.emacs.d
+git clone https://github.com/brbass/.emacs.d.git ~/.emacs.d
 ```
 
 ## Features to add:
