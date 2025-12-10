@@ -4,6 +4,7 @@
 
 ;; Use spaces instead of tabs
 (setq-default indent-tabs-mode nil)
+(setq c-basic-offset 2)
 
 ;; Remove anything that could encourage mouse use and weakness
 (menu-bar-mode -1)    ;; Removes the top menu bar
@@ -18,9 +19,16 @@
 (global-set-key (kbd "RET") #'newline)
 
 ;; Make it so C++ doesn't indent in namespace
-(defun my-c++-namespace-indent-fix ()
+(defun my/c++-namespace-indent-fix ()
   "Don't indent code inside C++ namespace blocks."
   (c-set-offset 'innamespace 0))
+(add-hook 'c++-mode-hook 'my/c++-namespace-indent-fix)
+
+;; 
+
+;; Show the column number and containing function
+(column-number-mode 1)
+(which-function-mode 1)
 
 ;; Reload file quickly
 (defun my/revert-buffer ()
@@ -32,6 +40,14 @@
     (revert-buffer :ignore-auto :noconfirm)))
 (global-set-key (kbd "C-c C-r") 'my/revert-buffer)
 
+;; Make sure we only have one thread in eshell
+(add-hook 'eshell-mode-hook
+          (lambda ()
+            (setenv "OMP_NUM_THREADS" "1")))
+
+;; Ediff otherwise splits vertically
+(setq ediff-split-window-function 'split-window-horizontally)
+
 ;;-----------------;;
 ;; Set up packages ;;
 ;;-----------------;;
@@ -41,17 +57,17 @@
 (package-initialize)
 
 (dolist (pkg '(ace-window
-               ;; gruvbox-theme
+               ztree
+               ;; gruvbox-theme ;; themes
                nordic-night-theme
-               consult
+               consult ;; minibuffer changes
                consult-ls-git
                embark
                embark-consult
                marginalia
                orderless
                vertico
-               flycheck
-               transient
+               flycheck ;; lsp things
                lsp-mode
                lsp-pyright
                lsp-treemacs
@@ -65,6 +81,9 @@
 (global-set-key (kbd "M-o") #'ace-window)
 (with-eval-after-load 'term
   (define-key term-raw-map (kbd "M-o") #'ace-window))
+
+;; Recursive tree comparison: M-x ztree-diff
+(require 'ztree)
 
 ;; Better color theme
 ;; (require 'gruvbox-theme)
@@ -97,6 +116,11 @@
       completion-styles '(basic substring partial-completion flex)
       completion-pcm-leading-wildcard t)
 
+;; Acting on selected files
+(require 'embark)
+(require 'embark-consult)
+(global-set-key (kbd "C-c .") 'embark-act)
+
 ;; Consult for better search commands
 (require 'consult)
 (require 'consult-ls-git)
@@ -104,11 +128,6 @@
 (global-set-key (kbd "C-c s") 'consult-git-grep)        ; Search in project with git grep
 (global-set-key (kbd "C-c l") 'consult-line)            ; Search lines in current buffer
 (global-set-key (kbd "C-c f") 'consult-ls-git-ls-files) ; Find files (git-aware)
-
-;; Acting on selected files
-(require 'embark)
-(require 'embark-consult)
-(global-set-key (kbd "C-;") 'embark-act)
 
 ;; Language server support
 (require 'lsp-mode)
@@ -122,6 +141,8 @@
 ;; (add-hook 'f90-mode-hook     'lsp-deferred)  ;; fortls (modern Fortran)
 ;; (add-hook 'sh-mode-hook      'lsp-deferred)  ;; bash-language-server
 (global-set-key (kbd "M-'") 'lsp-find-references)
+(setq lsp-enable-on-type-formatting nil)  ;; Disable format on typing
+(setq lsp-enable-indentation nil)         ;; Disable LSP auto-indentation
 
 (require 'lsp-pyright)   ;; LSP wasn't finding pyright on its own
 (require 'lsp-treemacs)  ;; tree-based UI (symbols, errors, hierarchy)
