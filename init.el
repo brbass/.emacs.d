@@ -61,6 +61,8 @@
 
 (dolist (pkg '(ace-window
                ztree
+               eat
+               vterm
                ;; gruvbox-theme ;; themes
                nordic-night-theme
                consult ;; minibuffer changes
@@ -87,6 +89,12 @@
 
 ;; Recursive tree comparison: M-x ztree-diff
 (require 'ztree)
+
+;; Better terminal emulators
+(require 'eat)
+(require 'vterm)
+(eat-eshell-mode)
+(setq process-adaptive-read-buffering nil)
 
 ;; Better color theme
 ;; (require 'gruvbox-theme)
@@ -123,6 +131,7 @@
 (require 'embark)
 (require 'embark-consult)
 (global-set-key (kbd "C-c .") 'embark-act)
+(global-set-key (kbd "C-c ;") 'embark-export)
 
 ;; Consult for better search commands
 (require 'consult)
@@ -158,7 +167,7 @@
 
 (setq gc-cons-threshold (* 500 1024 1024))      ;; GC threshold 500 MB
 (setq gc-cons-percentage 0.2)                   ;; GC percentage
-(setq read-process-output-max (* 1 1024 1024))  ;; Read subprocess max 1 MB
+(setq read-process-output-max (* 64 1024 1024))  ;; Read subprocess max 64 MB
 (setq large-file-warning-threshold (* 500 1024 1024)) ;; Warn for files >500 MB
 
 (setq bidi-display-reordering 'left-to-right     ;; Disable expensive bidi
@@ -177,6 +186,9 @@
 ;; Native compilation settings (if available)
 (when (featurep 'native-compile)
   (setq native-comp-async-report-warnings-errors 'silent))
+
+;; Subprocess settings
+(setq process-adaptive-read-buffering nil)
 
 ;;-----------------------;;
 ;; Check for local files ;;
@@ -204,6 +216,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(inhibit-startup-screen t)
  '(package-selected-packages nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
