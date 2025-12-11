@@ -50,11 +50,17 @@
 (setq ediff-split-window-function 'split-window-horizontally)
 
 ;; Use minibuffers in minibuffers!
-(setf enable-recursive-minibuffers t)
+;; (setf enable-recursive-minibuffers t)
 
 ;;-----------------------------;;
 ;; Run commands in minibuffers ;;
 ;;-----------------------------;;
+(defun my/async-shell-insert-command-header (buf command)
+  "Insert COMMAND as a header at the top of BUF."
+  (with-current-buffer buf
+    (let ((inhibit-read-only t))
+      (goto-char (point-min))
+      (insert (format "$ %s\n\n" command)))))
 (defun my/async-shell-buffer-name (command)
   "Return a sanitized buffer name for COMMAND."
   (format "*%s*" (replace-regexp-in-string "[ \t\n]" "_" command)))
@@ -73,11 +79,9 @@
 (defun my/async-shell-command (command)
   "Run COMMAND asynchronously, using a buffer named after the command."
   (interactive
-   ;; Preserve original async-shell-command minibuffer behavior with completion and history
    (list (read-shell-command "Async shell command: "
                              nil 'shell-command-history)))
-  ;; Run async-shell-command but override the buffer name
-  (let ((buf (format "*%s*" (replace-regexp-in-string "[ \t\n]" "_" command))))
+  (let ((buf (my/async-shell-buffer-name command)))
     (async-shell-command command buf)))
 
 (global-set-key (kbd "M-*") 'my/async-send-current-region)
