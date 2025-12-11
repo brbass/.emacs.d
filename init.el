@@ -27,8 +27,6 @@
   (c-set-offset 'innamespace 0))
 (add-hook 'c++-mode-hook 'my/c++-namespace-indent-fix)
 
-;; 
-
 ;; Show the column number and containing function
 (column-number-mode 1)
 (which-function-mode 1)
@@ -51,6 +49,9 @@
 ;; Ediff otherwise splits vertically
 (setq ediff-split-window-function 'split-window-horizontally)
 
+;; Use minibuffers in minibuffers!
+(setf enable-recursive-minibuffers t)
+
 ;;-----------------;;
 ;; Set up packages ;;
 ;;-----------------;;
@@ -61,17 +62,23 @@
 
 (dolist (pkg '(ace-window
                ztree
-               eat
-               ;; gruvbox-theme ;; themes
+               ;; terminal things
+               vterm
+               direnv
+               shelldon
+               ;; themes
+               ;; gruvbox-theme
                nordic-night-theme
-               consult ;; minibuffer changes
+               ;; minibuffer changes
+               consult
                consult-ls-git
                embark
                embark-consult
                marginalia
                orderless
                vertico
-               flycheck ;; lsp things
+               ;; lsp things
+               flycheck
                lsp-mode
                lsp-pyright
                lsp-treemacs
@@ -82,16 +89,26 @@
 ;; Ace window for switching windows easily
 (require 'ace-window)
 (setq aw-scope 'frame)
-(global-set-key (kbd "M-o") #'ace-window)
+(global-set-key (kbd "M-o") 'ace-window)
 (with-eval-after-load 'term
-  (define-key term-raw-map (kbd "M-o") #'ace-window))
+  (define-key term-raw-map (kbd "M-o") 'ace-window))
 
 ;; Recursive tree comparison: M-x ztree-diff
 (require 'ztree)
 
-;; Better terminal emulators
-(require 'eat)
-(eat-eshell-mode)
+;; Performant terminal emulator
+(require 'vterm)
+
+;; For automatically loading direnv
+(require 'direnv)
+(direnv-mode)
+
+;; Run shell commands
+(require 'shelldon)
+(setq shell-command-switch "-ic")
+(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
+(add-hook 'shelldon-mode-hook #'ansi-color-for-comint-mode-on)
+(add-to-list 'comint-output-filter-functions 'ansi-color-process-output)
 
 ;; Better color theme
 ;; (require 'gruvbox-theme)
