@@ -65,7 +65,6 @@
                ;; terminal things
                vterm
                direnv
-               shelldon
                ;; themes
                ;; gruvbox-theme
                nordic-night-theme
@@ -102,13 +101,6 @@
 ;; For automatically loading direnv
 (require 'direnv)
 (direnv-mode)
-
-;; Run shell commands
-(require 'shelldon)
-(setq shell-command-switch "-ic")
-(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
-(add-hook 'shelldon-mode-hook #'ansi-color-for-comint-mode-on)
-(add-to-list 'comint-output-filter-functions 'ansi-color-process-output)
 
 ;; Better color theme
 ;; (require 'gruvbox-theme)
