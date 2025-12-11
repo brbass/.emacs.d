@@ -38,6 +38,9 @@ npm install -g bash-language-server
 
 # Search tools
 sudo apt install ripgrep
+
+# For vterm
+sudo apt install libvterm-dev
 ```
 
 ### Back up your existing config if needed
