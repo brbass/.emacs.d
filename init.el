@@ -7,9 +7,12 @@
 (setq c-basic-offset 2)
 
 ;; Remove anything that could encourage mouse use and weakness
-(menu-bar-mode -1)    ;; Removes the top menu bar
-(tool-bar-mode -1)    ;; Removes the button toolbar
-(scroll-bar-mode -1)  ;; Removes the right scroll bar
+(when (fboundp 'menu-bar-mode)
+  (menu-bar-mode -1)) ;; Removes the top menu bar
+(when (fboundp 'tool-bar-mode)
+  (tool-bar-mode -1)) ;; Removes the button toolbar
+(when (fboundp 'scroll-bar-mode)
+  (scroll-bar-mode -1)) ;; Removes the right scroll bar
 
 ;; Clean file complete
 (setq minibuffer-auto-raise t)
