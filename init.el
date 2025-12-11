@@ -62,7 +62,6 @@
 (dolist (pkg '(ace-window
                ztree
                eat
-               vterm
                ;; gruvbox-theme ;; themes
                nordic-night-theme
                consult ;; minibuffer changes
@@ -92,9 +91,7 @@
 
 ;; Better terminal emulators
 (require 'eat)
-(require 'vterm)
 (eat-eshell-mode)
-(setq process-adaptive-read-buffering nil)
 
 ;; Better color theme
 ;; (require 'gruvbox-theme)
@@ -167,7 +164,6 @@
 
 (setq gc-cons-threshold (* 500 1024 1024))      ;; GC threshold 500 MB
 (setq gc-cons-percentage 0.2)                   ;; GC percentage
-(setq read-process-output-max (* 64 1024 1024))  ;; Read subprocess max 64 MB
 (setq large-file-warning-threshold (* 500 1024 1024)) ;; Warn for files >500 MB
 
 (setq bidi-display-reordering 'left-to-right     ;; Disable expensive bidi
@@ -188,6 +184,7 @@
   (setq native-comp-async-report-warnings-errors 'silent))
 
 ;; Subprocess settings
+(setq read-process-output-max (* 64 1024 1024))  ;; Read subprocess max 64 MB
 (setq process-adaptive-read-buffering nil)
 
 ;;-----------------------;;
