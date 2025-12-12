@@ -55,7 +55,7 @@
 ;;-----------------------------;;
 ;; Run commands in minibuffers ;;
 ;;-----------------------------;;
-(defun my/get-markdown-key (key)
+(defun my/get-key (key)
   "Return the nearest preceding value of KEY in a Markdown buffer.
 KEY should be a string like \"dir\" or \"path\".
 Only searches Markdown buffers and returns a valid directory if applicable."
@@ -68,17 +68,21 @@ Only searches Markdown buffers and returns a valid directory if applicable."
               (when (file-directory-p val)
                 (file-name-as-directory val))
             val))))))
-(defmacro my/with-data-from-markdown (&rest body)
+(defmacro my/with-data-keys (&rest body)
   "Execute BODY in dir: and path: from Markdown buffer if present."
-  `(let ((dir (my/get-markdown-key "dir"))
-         (new-path (my/get-markdown-key "path"))
+  `(let ((orig-dir default-directory)
+         (dir (my/get-key "dir"))
+         (new-path (my/get-key "path"))
          (old-path (getenv "PATH")))
      (unwind-protect
          (progn
+           ;; If dir and path exist, then set them
            (when dir (setq default-directory dir))
            (when new-path (setenv "PATH" (concat new-path ":" old-path)))
            ,@body)
-       (when new-path (setenv "PATH" old-path)))))
+       ;; If dir and path exist, then restore the original values
+       (when new-path (setenv "PATH" old-path))
+       (when dir (setq default-directory orig-dir)))))
 (defun my/async-shell-insert-command-header (buf command)
   "Insert COMMAND as a header at the top of BUF."
   (with-current-buffer buf
@@ -93,14 +97,14 @@ Only searches Markdown buffers and returns a valid directory if applicable."
   "Send the current line to an async shell command, running in dir: if present."
   (interactive)
   (let ((line (thing-at-point 'line t)))
-    (my/with-data-from-markdown
+    (my/with-data-keys
      (let ((buf (my/async-shell-buffer-name line)))
        (async-shell-command line buf)))))
 (defun my/async-send-current-region (start end)
   "Send the current region to an async shell command, running in dir: if present."
   (interactive "r")
   (let ((region-text (buffer-substring-no-properties start end)))
-    (my/with-data-from-markdown
+    (my/with-data-keys
      (let ((buf (my/async-shell-buffer-name region-text)))
        (async-shell-command region-text buf)))))
 (defun my/async-shell-command (command)
@@ -108,7 +112,7 @@ Only searches Markdown buffers and returns a valid directory if applicable."
   (interactive
    (list (read-shell-command "Async shell command: "
                              nil 'shell-command-history)))
-  (my/with-data-from-markdown
+  (my/with-data-keys
    (let ((buf (my/async-shell-buffer-name command)))
      (async-shell-command command buf))))
 
