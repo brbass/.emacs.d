@@ -55,6 +55,30 @@
 ;;-----------------------------;;
 ;; Run commands in minibuffers ;;
 ;;-----------------------------;;
+(defun my/get-markdown-key (key)
+  "Return the nearest preceding value of KEY in a Markdown buffer.
+KEY should be a string like \"dir\" or \"path\".
+Only searches Markdown buffers and returns a valid directory if applicable."
+  (when (derived-mode-p 'markdown-mode 'gfm-mode)
+    (save-excursion
+      (when (re-search-backward (format "^%s:[[:space:]]*\\(.*\\)$" (regexp-quote key)) nil t)
+        (let ((val (string-trim (match-string 1))))
+          ;; For keys representing directories, validate they exist
+          (if (member key '("dir" "path"))
+              (when (file-directory-p val)
+                (file-name-as-directory val))
+            val))))))
+(defmacro my/with-data-from-markdown (&rest body)
+  "Execute BODY in dir: and path: from Markdown buffer if present."
+  `(let ((dir (my/get-markdown-key "dir"))
+         (new-path (my/get-markdown-key "path"))
+         (old-path (getenv "PATH")))
+     (unwind-protect
+         (progn
+           (when dir (setq default-directory dir))
+           (when new-path (setenv "PATH" (concat new-path ":" old-path)))
+           ,@body)
+       (when new-path (setenv "PATH" old-path)))))
 (defun my/async-shell-insert-command-header (buf command)
   "Insert COMMAND as a header at the top of BUF."
   (with-current-buffer buf
@@ -66,24 +90,27 @@
   (let ((trimmed (string-trim-left command)))
     trimmed))
 (defun my/async-send-current-line ()
-  "Send the current line to an async shell command, showing output in a buffer named after the command."
+  "Send the current line to an async shell command, running in dir: if present."
   (interactive)
-  (let* ((line (thing-at-point 'line t))
-         (buf (my/async-shell-buffer-name line)))
-    (async-shell-command line buf)))
+  (let ((line (thing-at-point 'line t)))
+    (my/with-data-from-markdown
+     (let ((buf (my/async-shell-buffer-name line)))
+       (async-shell-command line buf)))))
 (defun my/async-send-current-region (start end)
-  "Send the current region to an async shell command, showing output in a buffer named after the command."
+  "Send the current region to an async shell command, running in dir: if present."
   (interactive "r")
-  (let* ((region-text (buffer-substring-no-properties start end))
-         (buf (my/async-shell-buffer-name region-text)))
-    (async-shell-command region-text buf)))
+  (let ((region-text (buffer-substring-no-properties start end)))
+    (my/with-data-from-markdown
+     (let ((buf (my/async-shell-buffer-name region-text)))
+       (async-shell-command region-text buf)))))
 (defun my/async-shell-command (command)
-  "Run COMMAND asynchronously, using a buffer named after the command."
+  "Run COMMAND asynchronously, using a buffer named after the command, in dir: if present."
   (interactive
    (list (read-shell-command "Async shell command: "
                              nil 'shell-command-history)))
-  (let ((buf (my/async-shell-buffer-name command)))
-    (async-shell-command command buf)))
+  (my/with-data-from-markdown
+   (let ((buf (my/async-shell-buffer-name command)))
+     (async-shell-command command buf))))
 
 (global-set-key (kbd "M-*") 'my/async-send-current-region)
 (global-set-key (kbd "M-|") 'my/async-send-current-line)
@@ -101,7 +128,8 @@
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
 
-(dolist (pkg '(ace-window
+(dolist (pkg '(benchmark-init
+               ace-window
                ztree
                magit
                ;; Terminal
@@ -126,6 +154,10 @@
                lsp-ui))
   (unless (package-installed-p pkg)
     (package-install pkg)))
+
+;; Timing
+(require 'benchmark-init)
+(add-hook 'after-init-hook 'benchmark-init/deactivate)
 
 ;; Ace window for switching windows easily
 (require 'ace-window)
