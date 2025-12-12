@@ -4,6 +4,7 @@ This keeps mostly default emacs but adds the following:
 - Language server support
 - Support for searching for and within files quickly
 - Some changes to completion that keep things similar to default emacs
+- Easier management of async shell commands
 - Performance tweaks
 
 ### Build emacs from source
@@ -63,8 +64,8 @@ git clone https://github.com/brbass/.emacs.d.git ~/.emacs.d
 ## Other setup nodes
 
 - If a package is not found, run `M-x package-refresh-contents` and try opening emacs again. 
-- Not emacs-related, but the ghostty terminal needs the following fix for using ssh:
-```bash
-infocmp -x xterm-ghostty | ssh YOUR-SERVER -- tic -x -
-```
+- Not emacs-related, but the [ghostty terminal](https://ghostty.org/docs) needs the [following fix](https://ghostty.org/docs/help/terminfo#ssh) to use ssh:
+  ```bash
+  infocmp -x xterm-ghostty | ssh YOUR-SERVER -- tic -x -
+  ```
 
