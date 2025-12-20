@@ -130,6 +130,11 @@ Only searches Markdown buffers and returns only a valid directory if applicable.
 (setq shell-file-name "bash")
 (setq shell-command-switch "-ic")
 
+;; To auto-hide the body in outline mode, add this line
+;;   ((markdown-mode . ((eval . (outline-hide-body)))))
+;; to the .dir-locals.el in the directory with a file
+(setq safe-local-variable-values '((eval outline-hide-body)))
+
 ;;--------------------;;
 ;; Performance tuning ;;
 ;;--------------------;;
@@ -164,6 +169,8 @@ Only searches Markdown buffers and returns only a valid directory if applicable.
 
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
+
 (package-initialize)
 
 (dolist (pkg '(
@@ -191,6 +198,8 @@ Only searches Markdown buffers and returns only a valid directory if applicable.
                lsp-pyright
                lsp-treemacs
                lsp-ui
+               ;; LLM support
+               agent-shell
                ))
   (unless (package-installed-p pkg)
     (package-install pkg)))
@@ -282,6 +291,8 @@ Only searches Markdown buffers and returns only a valid directory if applicable.
 (require 'lsp-ui)        ;; sideline, documentation popups, peek UI
 (require 'flycheck)      ;; linting via flycheck
 
+(require 'agent-shell)
+
 ;;-----------------------;;
 ;; Check for local files ;;
 ;;-----------------------;;
@@ -302,16 +313,3 @@ Only searches Markdown buffers and returns only a valid directory if applicable.
 ;;-------------------------------------;;
 ;; Section for things added at runtime ;;
 ;;-------------------------------------;;
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages nil)
- '(safe-local-variable-values '((eval outline-hide-body))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
