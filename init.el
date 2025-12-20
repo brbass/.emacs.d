@@ -286,12 +286,12 @@ Only searches Markdown buffers and returns only a valid directory if applicable.
 
 (require 'eca)
 (setq eca-server-download-method 'curl)
-(setq eca-server-download-url
-      "https://github.com/editor-code-assistant/eca/releases/latest/download/eca-native-linux-amd64.zip")
-(setq eca-unzip-script (lambda () "unzip %s -d %s"))
 (defun my/eca-install-server ()
-  "Install the ECA server, using version 'latest'."
+  "In case standard ECA install doesn't work"
   (interactive)
+  (setq eca-server-download-url
+        "https://github.com/editor-code-assistant/eca/releases/latest/download/eca-native-linux-amd64.zip")
+  (setq eca-unzip-script (lambda () "unzip %s -d %s"))
   (eca-process--download-server
    (lambda () (message "ECA server installed successfully!"))
    "latest"))
