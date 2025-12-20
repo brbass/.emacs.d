@@ -166,7 +166,9 @@ Only searches Markdown buffers and returns only a valid directory if applicable.
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
 
-(dolist (pkg '(ace-window
+(dolist (pkg '(
+               ;; General
+               ace-window
                ztree
                magit
                ;; Terminal
@@ -188,7 +190,10 @@ Only searches Markdown buffers and returns only a valid directory if applicable.
                lsp-mode
                lsp-pyright
                lsp-treemacs
-               lsp-ui))
+               lsp-ui
+               ;; LLM integration
+               eca
+               ))
   (unless (package-installed-p pkg)
     (package-install pkg)))
 
@@ -279,6 +284,18 @@ Only searches Markdown buffers and returns only a valid directory if applicable.
 (require 'lsp-ui)        ;; sideline, documentation popups, peek UI
 (require 'flycheck)      ;; linting via flycheck
 
+(require 'eca)
+(setq eca-server-download-method 'curl)
+(setq eca-server-download-url
+      "https://github.com/editor-code-assistant/eca/releases/latest/download/eca-native-linux-amd64.zip")
+(setq eca-unzip-script (lambda () "unzip %s -d %s"))
+(defun my/eca-install-server ()
+  "Install the ECA server, using version 'latest'."
+  (interactive)
+  (eca-process--download-server
+   (lambda () (message "ECA server installed successfully!"))
+   "latest"))
+
 ;;-----------------------;;
 ;; Check for local files ;;
 ;;-----------------------;;
@@ -304,6 +321,7 @@ Only searches Markdown buffers and returns only a valid directory if applicable.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(package-selected-packages nil)
  '(safe-local-variable-values '((eval outline-hide-body))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
