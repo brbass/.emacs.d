@@ -245,7 +245,7 @@ environment is inherited by subprocesses (e.g. async-shell-command)."
          ("C-c C-k" . vterm-copy-mode))
   :init
   (setq vterm-keymap-exceptions
-        '("C-c" "C-x" "C-u" "C-g" "C-h" "C-l" "M-x" "M-o"))
+        '("C-c" "C-x" "C-u" "C-g" "C-h" "C-l" "M-x" "M-o" "C-y" "M-y"))
   :config
   (defun my/vterm-send-escape ()
     "Send ESC to the terminal."
