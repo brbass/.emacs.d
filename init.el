@@ -74,6 +74,9 @@
           (lambda ()
             (setenv "OMP_NUM_THREADS" "1")))
 
+;; Automatically follow symlinks to git-controlled files without prompting
+(setq vc-follow-symlinks t)
+
 ;; Avoid automatic splitting of windows vertically
 (setq split-height-threshold nil)
 
