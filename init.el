@@ -121,15 +121,29 @@ Only searches Markdown buffers and returns only a valid directory if applicable.
               (when (file-directory-p val)
                 (file-name-as-directory val))
             val))))))
+(defvar my/async-edit nil
+  "When non-nil, `my/with-data-keys' prompts to view/edit dir and path
+before running.  Bound to the prefix arg by the async send commands, so
+`C-u M-&' / `C-u M-*' / `C-u M-|' let you confirm or change them.")
 (defmacro my/with-data-keys (&rest body)
   "Execute BODY in dir: and path: from Markdown buffer if present.
 Loads direnv for the target directory and ensures the resulting
-environment is inherited by subprocesses (e.g. async-shell-command)."
+environment is inherited by subprocesses (e.g. async-shell-command).
+When `my/async-edit' is non-nil, prompt to view/edit dir and path first
+(prefilled with the detected values, editable)."
   `(let ((orig-dir default-directory)
          (dir (my/get-key "dir"))
          (new-path (my/get-key "path"))
          (old-path (getenv "PATH"))
          (orig-env (copy-sequence process-environment)))
+     ;; Optionally let the user see and tweak dir/path before running.
+     (when my/async-edit
+       (setq dir (file-name-as-directory
+                  (read-directory-name "dir: " (or dir default-directory) nil t)))
+       (let ((p (string-trim
+                 (read-string "path (prepended to PATH, blank for none): "
+                              (or new-path "")))))
+         (setq new-path (unless (string-empty-p p) p))))
      (unwind-protect
          (progn
            ;; Load direnv for the target directory
@@ -158,26 +172,33 @@ environment is inherited by subprocesses (e.g. async-shell-command)."
 (defun my/strip-backticks (str)
   "Remove leading/trailing backticks and whitespace from STR."
   (string-trim (replace-regexp-in-string "`" "" str)))
-(defun my/async-send-current-line ()
-  "Send the current line to an async shell command, running in dir: if present."
-  (interactive)
-  (let ((line (my/strip-backticks (thing-at-point 'line t))))
+(defun my/async-send-current-line (&optional edit)
+  "Send the current line to an async shell command, running in dir: if present.
+With a prefix arg (EDIT), view/edit dir and path before running."
+  (interactive "P")
+  (let ((my/async-edit edit)
+        (line (my/strip-backticks (thing-at-point 'line t))))
     (my/with-data-keys
      (let ((buf (my/async-shell-buffer-name line)))
        (async-shell-command line buf)))))
-(defun my/async-send-current-region (start end)
-  "Send the current region to an async shell command, running in dir: if present."
-  (interactive "r")
-  (let ((region-text (my/strip-backticks (buffer-substring-no-properties start end))))
+(defun my/async-send-current-region (start end &optional edit)
+  "Send the current region to an async shell command, running in dir: if present.
+With a prefix arg (EDIT), view/edit dir and path before running."
+  (interactive "r\nP")
+  (let ((my/async-edit edit)
+        (region-text (my/strip-backticks (buffer-substring-no-properties start end))))
     (my/with-data-keys
      (let ((buf (my/async-shell-buffer-name region-text)))
        (async-shell-command region-text buf)))))
-(defun my/async-shell-command (command)
-  "Run COMMAND asynchronously, using a buffer named after the command, in dir: if present."
+(defun my/async-shell-command (command &optional edit)
+  "Run COMMAND asynchronously, using a buffer named after the command, in dir: if present.
+With a prefix arg (EDIT), view/edit dir and path before running."
   (interactive
    (list (read-shell-command "Async shell command: "
-                             nil 'shell-command-history)))
-  (let ((command (my/strip-backticks command)))
+                             nil 'shell-command-history)
+         current-prefix-arg))
+  (let ((my/async-edit edit)
+        (command (my/strip-backticks command)))
     (my/with-data-keys
      (let ((buf (my/async-shell-buffer-name command)))
        (async-shell-command command buf)))))
@@ -217,6 +238,10 @@ environment is inherited by subprocesses (e.g. async-shell-command)."
   (package-install 'use-package))
 (require 'use-package)
 (setq use-package-always-ensure t)
+
+;; Undo/redo window layout changes (handy after a split):
+;;   C-c <left>  restore previous layout   C-c <right>  redo
+(winner-mode 1)
 
 ;; Ace window for switching windows easily
 (use-package ace-window
