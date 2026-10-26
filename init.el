@@ -263,6 +263,15 @@ With a prefix arg (EDIT), view/edit dir and path before running."
   :defer t
   :commands (magit-status magit-dispatch magit-file-dispatch))
 
+;; One server per Emacs instance, since several run at once (one per tmux
+;; window); each vterm points emacsclient at its own Emacs below
+(use-package server
+  :ensure nil
+  :config
+  (setq server-name (format "server-%d" (emacs-pid)))
+  (unless (server-running-p server-name)
+    (server-start)))
+
 ;; Performant terminal emulator
 (use-package vterm
   :defer t
@@ -275,6 +284,8 @@ With a prefix arg (EDIT), view/edit dir and path before running."
   (setq vterm-keymap-exceptions
         '("C-c" "C-x" "C-u" "C-g" "C-h" "C-l" "M-x" "M-o" "C-y" "M-y"))
   :config
+  ;; zshrc sets EDITOR to emacsclient when this is present
+  (add-to-list 'vterm-environment (concat "EMACS_SOCKET_NAME=" server-name))
   (defun my/vterm-send-escape ()
     "Send ESC to the terminal."
     (interactive)
@@ -376,8 +387,17 @@ With a prefix arg (EDIT), view/edit dir and path before running."
          ("C-c d" . consult-dir))
   :config
   (setq consult-dir-default-command #'consult-dir-dired)
+  ;; Same directory ranking as `z' in the shell
+  (defvar my/consult-dir--source-zoxide
+    `(:name "Zoxide" :narrow ?z :category file :face consult-file
+      :history file-name-history
+      :enabled ,(lambda () (executable-find "zoxide"))
+      :items ,(lambda ()
+                (mapcar #'file-name-as-directory
+                        (process-lines "zoxide" "query" "--list")))))
   (setq consult-dir-sources
-        '(consult-dir--source-recentf
+        '(my/consult-dir--source-zoxide
+          consult-dir--source-recentf
           consult-dir--source-project
           consult-dir--source-bookmark)))
 
