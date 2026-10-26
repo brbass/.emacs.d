@@ -296,7 +296,10 @@ With a prefix arg (EDIT), view/edit dir and path before running."
 (use-package direnv
   :config
   (direnv-mode))
-(add-to-list 'warning-suppress-types '(direnv)) ;; otherwise opens warning buffer if direnv fails
+;; Otherwise opens warning buffer if direnv fails (deferred: the variable is
+;; void until warnings.el loads)
+(with-eval-after-load 'warnings
+  (add-to-list 'warning-suppress-types '(direnv)))
 
 ;; Better color theme
 ;; (use-package gruvbox-theme
