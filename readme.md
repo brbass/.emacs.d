@@ -47,20 +47,20 @@ M-' ;; Find references to variables
 ```bash
 sudo apt update
 sudo apt build-dep emacs
-wget https://ftp.gnu.org/gnu/emacs/emacs-30.2.tar.gz
-tar -zxf emacs-30.2.tar.gz
-cd emacs-30.2
+wget https://ftp.gnu.org/gnu/emacs/emacs-31.1.tar.gz
+tar -zxf emacs-31.1.tar.gz
+cd emacs-31.1
 mkdir build install
 cd build
-../configure --prefix="$PWD/../install"
-make -j 16
+../configure --prefix="$PWD/../install" --without-native-compilation
+make -j "$(nproc --all)"
 make install
 ```
 
 ### Add to path
 
 ```bash
-export PATH="/path/to/emacs-30.2/install/bin:$PATH"
+export PATH="/path/to/emacs-31.1/install/bin:$PATH"
 ```
 
 ### Install required packages
@@ -71,6 +71,8 @@ sudo apt install clangd
 sudo apt install fortran-language-server
 npm install -g pyright
 npm install -g bash-language-server
+# rust-analyzer via rustup (needs ~/.cargo/bin on PATH, e.g. `. ~/.cargo/env` in zshrc)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile minimal
 rustup component add rust-analyzer
 
 # Search tools

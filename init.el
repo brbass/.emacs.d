@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t -*-
 ;;---------------------------;;
 ;; Avoid polluting this file ;;
 ;;---------------------------;;
@@ -86,6 +87,14 @@
 ;; Use minibuffers in minibuffers!
 ;; (setf enable-recursive-minibuffers t)
 
+;; Set faces that win over the theme. Emacs 31's use-package :custom-face
+;; only changes a face's default spec, which themes override, so use this
+;; instead (it is what :custom-face did through Emacs 30).
+(defun my/override-faces (specs)
+  "Apply each (FACE SPEC) in SPECS as an override above any theme."
+  (dolist (s specs)
+    (face-spec-set (car s) (cadr s))))
+
 ;; Use ibuffer for C-x C-b
 (use-package ibuffer
   :ensure nil
@@ -94,8 +103,8 @@
   :config
   (setq ibuffer-expert t)
   (define-key ibuffer-mode-map (kbd "M-o") nil)
-  :custom-face
-  (ibuffer-filter-group-name-face ((t (:inherit font-lock-keyword-face :bold t)))))
+  (my/override-faces
+   '((ibuffer-filter-group-name-face ((t (:inherit font-lock-keyword-face :bold t)))))))
 (use-package ibuffer-project
   :after ibuffer
   :hook
@@ -423,15 +432,15 @@ With a prefix arg (EDIT), view/edit dir and path before running."
                       :foreground (face-foreground 'font-lock-keyword-face))
   (set-face-attribute 'markdown-code-face nil
                       :foreground (face-foreground 'font-lock-keyword-face))
-  :custom-face
-  (markdown-header-face-1 ((t (:inherit font-lock-constant-face :weight bold :underline t))))
-  (markdown-header-face-2 ((t (:inherit font-lock-type-face :weight bold))))
-  (markdown-header-face-3 ((t (:inherit font-lock-function-name-face :weight bold))))
-  (markdown-header-face-4 ((t (:inherit font-lock-preprocessor-face :weight bold))))
-  (markdown-header-face-5 ((t (:inherit font-lock-variable-name-face :slant italic))))
-  (markdown-header-face-6 ((t (:inherit font-lock-comment-face :slant italic))))
-  (markdown-comment-face ((t (:inherit font-lock-comment-face :slant italic))))
-  (markdown-italic-face ((t (:inherit font-lock-builtin-face :slant italic)))))
+  (my/override-faces
+   '((markdown-header-face-1 ((t (:inherit font-lock-constant-face :weight bold :underline t))))
+     (markdown-header-face-2 ((t (:inherit font-lock-type-face :weight bold))))
+     (markdown-header-face-3 ((t (:inherit font-lock-function-name-face :weight bold))))
+     (markdown-header-face-4 ((t (:inherit font-lock-preprocessor-face :weight bold))))
+     (markdown-header-face-5 ((t (:inherit font-lock-variable-name-face :slant italic))))
+     (markdown-header-face-6 ((t (:inherit font-lock-comment-face :slant italic))))
+     (markdown-comment-face ((t (:inherit font-lock-comment-face :slant italic))))
+     (markdown-italic-face ((t (:inherit font-lock-builtin-face :slant italic)))))))
 
 ;; Language server support
 (use-package lsp-mode
@@ -439,7 +448,10 @@ With a prefix arg (EDIT), view/edit dir and path before running."
   :commands (lsp lsp-deferred)
   :bind (("M-'" . lsp-find-references))
   :config
-  (setq lsp-prefer-flymake nil
+  (setq lsp-diagnostics-provider :flycheck
+        ;; corfu shows completions via capf; there is no company or yasnippet
+        lsp-completion-provider :none
+        lsp-enable-snippet nil
         lsp-session-file nil
         lsp-log-io nil
         lsp-enable-on-type-formatting nil
@@ -475,7 +487,9 @@ With a prefix arg (EDIT), view/edit dir and path before running."
   (setq corfu-auto t
         corfu-auto-delay 0.2
         corfu-auto-prefix 2))
+;; Emacs 31 shows corfu popups in terminals natively
 (use-package corfu-terminal
+  :if (< emacs-major-version 31)
   :after corfu
   :init
   (corfu-terminal-mode))

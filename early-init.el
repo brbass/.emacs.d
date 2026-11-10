@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t -*-
 ;;--------------------;;
 ;; Performance tuning ;;
 ;;--------------------;;
@@ -23,3 +24,9 @@
 ;; Improve subprocess read performance
 (setq read-process-output-max (* 64 1024 1024)
       process-adaptive-read-buffering nil)
+
+;; Activate packages from one precomputed autoloads file instead of reading
+;; every package's autoloads (1.1 s -> 0.05 s on EFS). package.el regenerates
+;; it on install/upgrade/delete; after anything else, run
+;; M-x package-quickstart-refresh
+(setq package-quickstart t)
